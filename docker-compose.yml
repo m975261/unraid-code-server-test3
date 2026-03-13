@@ -1,0 +1,40 @@
+services:
+  code-server-test3:
+    image: muaeabudhabi/code-server-test3:latest
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: 'true'
+      org.titan.app: code-server-test3
+    environment:
+    - NODE_ENV=production
+    - LOG_LEVEL=info
+    - PUID=99
+    - PGID=100
+    - UMASK=022
+    volumes:
+    - /mnt/user/appdata/code-server-test3/data:/data
+    - /mnt/user/appdata/code-server-test3/config:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: '3'
+    ports:
+    - 8443:8443
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - curl -sf http://localhost:8443/health || curl -sf http://localhost:8443/healthz
+        || curl -sf http://localhost:8443/ || exit 1
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    networks:
+    - code-server-test3_net
+networks:
+  code-server-test3_net:
+    driver: bridge
+volumes:
+  code-server-test3_data:
+    driver: local
